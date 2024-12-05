@@ -1,5 +1,5 @@
 # Apple-Music-Playlist-Auto-Adder
-一个基于 Selenium 的 Python 究极手残简易项目，能够实现自动登录网页版 Apple Music 并根据歌曲名称目录自动搜索歌曲并添加到自定义播放列表中，起因是觉得手动一首一首添加太慢了，不如自动化实现。
+一个基于 Selenium 的 Python 究极手残简陋项目，能够实现自动登录网页版 Apple Music 并根据歌曲名称目录自动搜索歌曲并添加到自定义播放列表中，起因是觉得手动一首一首添加太慢了，不如自动化实现。
 
 ## 使用方法
 先安装 Selenium :
