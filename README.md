@@ -6,7 +6,7 @@
 ```bash
 pip install selenium
 ```
-下载 [Microsoft Edge WebDriver](https://github.com/XinJingHao/Q-learning)，选择和当前 Edge 版本相同的驱动版本，解压至 Python 的环境目录下<br>
+下载 [Microsoft Edge WebDriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/?form=MA13LH)，选择和当前 Edge 版本相同的驱动版本，解压至 Python 的环境目录下<br>
 
 在 Run.py 中输入账号密码与待添加的播放列表名称:
 ```bash
