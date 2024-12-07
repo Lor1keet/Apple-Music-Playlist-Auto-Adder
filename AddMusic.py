@@ -7,7 +7,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.edge.options import Options
 import os
 import time
-
+import json
+import pathlib
 
 class AddMusic:
     def __init__(self, account, password, songlist, playlist):
@@ -21,68 +22,99 @@ class AddMusic:
     def Setup_driver(self):       
         user_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),  "user_data")
         self.options = Options()
-        self.options.add_argument(f"--user-data-dir={user_data_dir}") 
-        self.options.add_argument("--profile-directory=Default")  
-        
+        # self.options.add_argument(f"--user-data-dir={user_data_dir}") 
+        # self.options.add_argument("--profile-directory=Default")  
+    
+    def __save_cookie__(self):
+        cookies = self.driver.get_cookies()
+        json.dump(cookies, open("./cookies.json", "w+"))
+
+    def __load_cookie__(self):
+        if os.path.exists("./cookies.json"):
+            j = json.load(open("./cookies.json", "r"))
+            for d in j:
+                self.driver.add_cookie(d)
+    
+    def __has_login__(self):
+        try:
+            self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//span[@data-testid='account-menu-trigger']"))
+            )
+            return True
+        except TimeoutException:
+            return False
+
     def AM_login(self):
-            try:
-                # 初始化 WebDriver
-                self.driver = webdriver.Edge(options=self.options)
-                self.driver.get("https://music.apple.com/")
-                self.wait = WebDriverWait(self.driver, 20)
+        try:
+            # 初始化 WebDriver
+            self.driver = webdriver.Edge(options=self.options)
+            self.driver.get("https://music.apple.com/")
+            self.wait = WebDriverWait(self.driver, 20)
+            time.sleep(5)
+            self.__load_cookie__()
+            self.driver.refresh()
 
-                login_button = self.wait.until(
-                    EC.presence_of_element_located((By.XPATH, "//button[@data-testid='sign-in-button']"))
-                )
-                self.driver.execute_script("arguments[0].click();", login_button)
+            if self.__has_login__():
+                return
+            
+            login_button = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//button[@data-testid='sign-in-button']"))
+            )
+            self.driver.execute_script("arguments[0].click();", login_button)
 
-                iframe = self.wait.until(
-                    EC.presence_of_element_located((By.XPATH, "//div[@id='ck-container']/iframe"))
-                )
-                self.driver.switch_to.frame(iframe)
+            iframe = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//div[@id='ck-container']/iframe"))
+            )
+            self.driver.switch_to.frame(iframe)
 
-                account_name_input = self.wait.until(
-                    EC.presence_of_element_located((By.XPATH, "//input[@id='accountName']"))
-                )
-                account_name_input.clear()
-                account_name_input.send_keys(self.account)
+            account_name_input = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//input[@id='accountName']"))
+            )
+            account_name_input.clear()
+            account_name_input.send_keys(self.account)
 
-                next_button = self.wait.until(
-                    EC.presence_of_element_located((By.XPATH, "//button[@data-test='layout-onboarding-auth-button']"))
-                )
-                self.driver.execute_script("arguments[0].click();", next_button)
+            next_button = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//button[@data-test='layout-onboarding-auth-button']"))
+            )
+            self.driver.execute_script("arguments[0].click();", next_button)
 
-                iframe = self.wait.until(
-                    EC.presence_of_element_located((By.XPATH, "//div[@id='idms-widget-container']/iframe"))
-                )
-                self.driver.switch_to.frame(iframe)
+            iframe = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//div[@id='idms-widget-container']/iframe"))
+            )
+            self.driver.switch_to.frame(iframe)
 
-                continue_button = self.wait.until(
-                    EC.presence_of_element_located((By.XPATH, "//button[@id='continue-password']"))
-                )
-                self.driver.execute_script("arguments[0].click();", continue_button)
+            continue_button = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//button[@id='continue-password']"))
+            )
+            self.driver.execute_script("arguments[0].click();", continue_button)
 
-                password_input = self.wait.until(
-                    EC.presence_of_element_located((By.XPATH, "//input[@id='password_text_field']"))
-                )
-                password_input.clear()
-                password_input.send_keys(self.password)
+            password_input = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//input[@id='password_text_field']"))
+            )
+            password_input.clear()
+            password_input.send_keys(self.password)
 
-                sign_in_button = self.wait.until(
-                    EC.presence_of_element_located((By.XPATH, "//button[@id='sign-in']"))
-                )
-                self.driver.execute_script("arguments[0].click();", sign_in_button)
+            sign_in_button = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//button[@id='sign-in']"))
+            )
+            self.driver.execute_script("arguments[0].click();", sign_in_button)
 
-                self.driver.switch_to.default_content()
+            self.driver.switch_to.default_content()
 
-                # 等待验证
-                time.sleep(20)  
-                print("登录成功")
-                
-            except TimeoutException as e:               
-                print(f"登录过程中出现超时: {e}")             
-            except Exception as e:               
-                print(f"登录失败: {e}")
+            # 等待验证
+            self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//span[@data-testid='account-menu-trigger']"))
+            )
+
+            # time.sleep(20)  
+            print("登录成功")
+            self.__save_cookie__()
+            
+        except TimeoutException as e:               
+            print(f"登录过程中出现超时: {e}")             
+        except Exception as e:               
+            print(f"登录失败: {e}")
+        
 
     def SearchAdd(self):
         for song in self.songlist:
